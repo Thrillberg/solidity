@@ -4518,6 +4518,25 @@ BOOST_AUTO_TEST_CASE(overwriting_inheritance)
 	BOOST_CHECK(callContractFunction("checkOk()") == encodeArgs(6));
 }
 
+BOOST_AUTO_TEST_CASE(inherited_event_with_explicit_base)
+{
+	char const* sourceCode = R"(
+		contract A {
+			event x();
+		}
+		contract B is A {
+			function f() returns (uint) {
+				A.x();
+				return 1;
+			}
+		}
+	)";
+	compileAndRun(sourceCode, 0, "B");
+	BOOST_CHECK(callContractFunction("f()") == encodeArgs(1));
+	BOOST_REQUIRE_EQUAL(m_logs.size(), 1);
+	BOOST_CHECK_EQUAL(m_logs[0].address, m_contractAddress);
+}
+
 BOOST_AUTO_TEST_CASE(struct_assign_reference_to_struct)
 {
 	char const* sourceCode = R"(
